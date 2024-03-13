@@ -1,0 +1,23 @@
+version: '3'
+
+networks:
+  om3-network:
+    driver: bridge
+
+services:
+  nestjs_learning:
+    container_name: nestjs-learning
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: my-app
+    ports:
+      - '5000:5000'
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: ['npm', 'run', 'start:dev']
+    networks:
+      - om3-network
+    env_file:
+    - ./.env

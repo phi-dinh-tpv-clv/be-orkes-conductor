@@ -1,0 +1,14 @@
+{
+  "type": "mysql",
+  "host": "localhost",
+  "port": 8083,
+  "username": "root",
+  "password": "A@123456789abcd",
+  "database": "test",
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "migrations": ["src/migrations/*.ts", "dist/migrations/*{.ts,.js}"],
+  "cli": {
+    "migrationsDir": "src/migrations"
+  },
+  "synchronize": false
+}

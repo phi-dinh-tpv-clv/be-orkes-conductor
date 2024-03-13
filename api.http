@@ -1,0 +1,27 @@
+GET http://localhost:5000/api/posts
+Content-Type: application/json;
+
+###
+GET http://localhost:5000/api/posts/12
+Content-Type: application/json;
+
+###
+POST http://localhost:5000/api/posts HTTP/1.1
+content-type: application/json
+
+{
+    "title": "Title 1",
+    "content": "Content content content content"
+}
+
+###
+PUT http://localhost:5000/api/posts/13 HTTP/1.1
+content-type: application/json
+
+{
+    "title": "Updateeeeeeeeee"
+}
+
+###
+DELETE http://localhost:5000/api/posts/7 HTTP/1.1
+content-type: application/json
