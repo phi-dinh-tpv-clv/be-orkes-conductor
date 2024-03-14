@@ -1,17 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
+import { MicroserviceOptions } from '@nestjs/microservices';
+import { kafkaClientOptions } from './config/kafka-client.option';
 
 async function bootstrap() {
-  dotenv.config();
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
 
   app.enableCors({
     origin: '*',
   });
+
+  app.connectMicroservice<MicroserviceOptions>(kafkaClientOptions);
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -24,10 +26,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const PORT = process.env.PORT;
-  await app.listen(PORT, () => {
-    console.log(`Application is running on: ${PORT}`);
-  });
+  await app.listen(null);
 }
 
 bootstrap();

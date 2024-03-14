@@ -1,0 +1,259 @@
+{
+  "createTime": 1710218566725,
+  "updateTime": 1710410621962,
+  "name": "FLM_Notify_Email",
+  "description": "Users can receive notification via Email or In-App",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "set_initial_variable",
+      "taskReferenceName": "set_variable_ref",
+      "inputParameters": {
+        "firstLineApproved": "${workflow.input.isFirstLineApproved}"
+      },
+      "type": "SET_VARIABLE",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": [],
+      "onStateChange": {}
+    },
+    {
+      "name": "do_while_assignment",
+      "taskReferenceName": "do_while_assignment_ref",
+      "inputParameters": {
+        "isApproved": "${workflow.variables.isApproved}"
+      },
+      "type": "DO_WHILE",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopCondition": "(function() {\r\n  if ($.isApproved) {\r\n    return false;\r\n  }\r\n  return true;\r\n})();",
+      "loopOver": [
+        {
+          "name": "switch_approval",
+          "taskReferenceName": "switch_approval_ref",
+          "inputParameters": {
+            "firstApproval": "${workflow.input.isFirstLineApproved}"
+          },
+          "type": "SWITCH",
+          "decisionCases": {
+            "APPROVED FIRST LINE": [
+              {
+                "name": "set_variable_config",
+                "taskReferenceName": "set_variable_config_ref",
+                "inputParameters": {
+                  "send_grid_api_key": "${workflow.input.SENDGRID_API_KEY}",
+                  "template_id": "templateid_sendgrid",
+                  "sender_email": "sender@one-line.com",
+                  "workflow_id": "${workflow.workflowId}",
+                  "approve_task_ref": "second_approval_request_ref",
+                  "request_id": "request_id"
+                },
+                "type": "SET_VARIABLE",
+                "decisionCases": {},
+                "defaultCase": [],
+                "forkTasks": [],
+                "startDelay": 0,
+                "joinOn": [],
+                "optional": false,
+                "defaultExclusiveJoinTask": [],
+                "asyncComplete": false,
+                "loopOver": [],
+                "onStateChange": {}
+              },
+              {
+                "name": "fork",
+                "taskReferenceName": "fork_ref",
+                "inputParameters": {},
+                "type": "FORK_JOIN",
+                "decisionCases": {},
+                "defaultCase": [],
+                "forkTasks": [
+                  [
+                    {
+                      "name": "send_mail_http",
+                      "taskReferenceName": "http_ref",
+                      "inputParameters": {
+                        "uri": "https://orkes-api-tester.orkesconductor.com/api",
+                        "method": "GET",
+                        "connectionTimeOut": 3000,
+                        "readTimeOut": "3000",
+                        "accept": "application/json",
+                        "contentType": "application/json",
+                        "body": {
+                          "sender": {
+                            "name": "phi.dinh.tpv@one-line.com",
+                            "email": "phi.dinh.tpv@one-line.com"
+                          },
+                          "template_id": "${set_variable_config_ref.output.template_id}"
+                        }
+                      },
+                      "type": "HTTP",
+                      "decisionCases": {},
+                      "defaultCase": [],
+                      "forkTasks": [],
+                      "startDelay": 0,
+                      "joinOn": [],
+                      "optional": false,
+                      "defaultExclusiveJoinTask": [],
+                      "asyncComplete": false,
+                      "loopOver": [],
+                      "onStateChange": {}
+                    }
+                  ],
+                  [
+                    {
+                      "name": "send-approved-event",
+                      "taskReferenceName": "send-approved-event_ref",
+                      "inputParameters": {
+                        "workflowId": "${workflow.workflowId}",
+                        "taskRef": "second_approval_request_ref"
+                      },
+                      "type": "EVENT",
+                      "decisionCases": {},
+                      "defaultCase": [],
+                      "forkTasks": [],
+                      "startDelay": 0,
+                      "joinOn": [],
+                      "sink": "kafka:one-om-dev-workflowpoc-created-private",
+                      "optional": false,
+                      "defaultExclusiveJoinTask": [],
+                      "asyncComplete": false,
+                      "loopOver": [],
+                      "onStateChange": {}
+                    }
+                  ]
+                ],
+                "startDelay": 0,
+                "joinOn": [],
+                "optional": false,
+                "defaultExclusiveJoinTask": [],
+                "asyncComplete": false,
+                "loopOver": [],
+                "onStateChange": {}
+              },
+              {
+                "name": "join_approval",
+                "taskReferenceName": "join_approval_ref",
+                "inputParameters": {},
+                "type": "JOIN",
+                "decisionCases": {},
+                "defaultCase": [],
+                "forkTasks": [],
+                "startDelay": 0,
+                "joinOn": ["http_ref", "send-approved-event_ref"],
+                "optional": false,
+                "defaultExclusiveJoinTask": [],
+                "asyncComplete": false,
+                "loopOver": [],
+                "onStateChange": {}
+              },
+              {
+                "name": "event_update",
+                "taskReferenceName": "event_update_ref",
+                "inputParameters": {
+                  "task_ref": "Some-Value-8jj00",
+                  "is_approved": "Some-Value-2zchc",
+                  "manager_id": "Some-Value-eld3g"
+                },
+                "type": "EVENT",
+                "decisionCases": {},
+                "defaultCase": [],
+                "forkTasks": [],
+                "startDelay": 0,
+                "joinOn": [],
+                "sink": "kafka:one-om-dev-workflowpoc-updated-private",
+                "optional": false,
+                "defaultExclusiveJoinTask": [],
+                "asyncComplete": false,
+                "loopOver": [],
+                "onStateChange": {}
+              },
+              {
+                "name": "switch",
+                "taskReferenceName": "switch_ref",
+                "inputParameters": {
+                  "switchCaseValue": ""
+                },
+                "type": "SWITCH",
+                "decisionCases": {},
+                "defaultCase": [],
+                "forkTasks": [],
+                "startDelay": 0,
+                "joinOn": [],
+                "optional": false,
+                "defaultExclusiveJoinTask": [],
+                "asyncComplete": false,
+                "loopOver": [],
+                "evaluatorType": "value-param",
+                "expression": "switchCaseValue",
+                "onStateChange": {}
+              },
+              {
+                "name": "last_approved_end_loop",
+                "taskReferenceName": "last_approved_end_loop_ref",
+                "inputParameters": {
+                  "isApproved": "${event_update_ref.output.is_approved}"
+                },
+                "type": "SET_VARIABLE",
+                "decisionCases": {},
+                "defaultCase": [],
+                "forkTasks": [],
+                "startDelay": 0,
+                "joinOn": [],
+                "optional": false,
+                "defaultExclusiveJoinTask": [],
+                "asyncComplete": false,
+                "loopOver": [],
+                "onStateChange": {}
+              }
+            ]
+          },
+          "defaultCase": [],
+          "forkTasks": [],
+          "startDelay": 0,
+          "joinOn": [],
+          "optional": false,
+          "defaultExclusiveJoinTask": [],
+          "asyncComplete": false,
+          "loopOver": [],
+          "evaluatorType": "graaljs",
+          "expression": "(function() {\r\n  if ($.firstApproval == 'true') return \"APPROVED FIRST LINE\";\r\n  return \"REJECTED\";\r\n})()",
+          "onStateChange": {}
+        }
+      ],
+      "evaluatorType": "graaljs",
+      "onStateChange": {}
+    }
+  ],
+  "inputParameters": [
+    "groupId",
+    "brokerHost",
+    "clientId",
+    "isFirstLineApproved",
+    "secondLineEmail",
+    "firstLineEmail",
+    "SENDGRID_API_KEY"
+  ],
+  "outputParameters": {},
+  "failureWorkflow": "",
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "ownerEmail": "phi.dinh.tpv@one-line.com",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

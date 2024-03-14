@@ -5,12 +5,12 @@ networks:
     driver: bridge
 
 services:
-  nestjs_learning:
-    container_name: nestjs-learning
+  be-orkes-conductor:
+    container_name: be-orkes-conductor
     build:
       context: .
       dockerfile: ./Dockerfile
-    image: my-app
+    image: phidinh:be-orkes-conductor:latest
     ports:
       - '5000:5000'
     working_dir: /app
@@ -20,4 +20,4 @@ services:
     networks:
       - om3-network
     env_file:
-    - ./.env
+      - ./.env
